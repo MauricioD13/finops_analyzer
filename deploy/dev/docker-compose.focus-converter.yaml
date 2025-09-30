@@ -1,0 +1,20 @@
+---
+services:
+  focus-converter:
+    build:
+      context: .
+      dockerfile: dockerfile.converter.yaml
+    container_name: focus-converter
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./input:/app/workspace
+      - ./output:/app/output
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "which", "focus-converter"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

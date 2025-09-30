@@ -1,0 +1,24 @@
+FROM bitnami/python:latest
+
+# Set working directory
+WORKDIR /app
+
+# Update packages and install pipx
+RUN apt update && apt upgrade -y
+RUN apt install -y pipx
+
+# Install focus_converter and dependencies
+RUN pipx ensurepath && pipx install focus_converter
+RUN pipx inject focus-converter "typer==0.9.0" "click==8.0.4" && \
+    pipx inject focus-converter "pandera>=0.21,<0.22" &&  \
+    pipx inject focus-converter "multimethod<2"
+
+# Add pipx bin to PATH
+ENV PATH="/root/.local/bin:$PATH"
+
+# Create workspace directory
+RUN mkdir -p /app/workspace
+
+# Keep container running
+CMD ["tail", "-f", "/dev/null"]
+
