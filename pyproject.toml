@@ -1,0 +1,19 @@
+[project]
+name = "finops-analyzer"
+version = "0.1.0"
+description = "Bill data from major cloud provider into FOCUS framework"
+authors = [
+    {name = "Mauricio Cuello",email = "mauricio.cuello@tribuops.com"}
+]
+license = {text = "BSL"}
+readme = "README.md"
+requires-python = ">=3.9,<4.0"
+dependencies = [
+    "fastapi[standard] (>=0.117.1,<0.118.0)",
+    "jinja2 (>=3.1.6,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
