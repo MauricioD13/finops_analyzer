@@ -47,14 +47,15 @@
                 </h4>
 
                 <form class="space-y-6" id="converter-form" hx-post="{{ url_for('converter_post') }}"
-                    hx-encoding="multipart/form-data" hx-target="#response-area" hx-indicator="#loading-indicator">
+                    hx-encoding="multipart/form-data" hx-target="#response-area" hx-indicator="#loading-indicator" 
+                    hx-params="*">
                     <!-- Provider Detection -->
                     <div class="form-group animate-slide-up" style="animation-delay: 0.1s;">
-                        <label for="provider-detection" class="block text-sm font-medium text-white mb-2">
+                        <label for="provider_detection" class="block text-sm font-medium text-white mb-2">
                             Provider Detection
                         </label>
                         <div class="relative">
-                            <select id="provider-detection" name="provider_detection"
+                            <select id="provider_detection" name="provider_detection"
                                 class="w-full appearance-none rounded-lg bg-white/5 py-3 pr-10 pl-4 text-white outline-none border border-white/10 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 hover:bg-white/10">
                                 <option value="manual">Manual</option>
                                 <option value="automatic">Automatic</option>
