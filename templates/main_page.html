@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="/static/css/main_page.css">
+{% endblock %}
+{% block content %}
+
+<div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -inset-10 opacity-20">
+        <div
+            class="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-float">
+        </div>
+        <div class="absolute top-3/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
+            style="animation-delay: 4s;"></div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<main class="relative z-10">
+    <!-- Hero Section -->
+    <section class="px-6 py-20">
+        <div class="max-w-7xl mx-auto text-center animate-fade-in">
+            <h2
+                class="text-6xl md:text-7xl font-extrabold mb-6 bg-gradient-to-r from-white via-cyan-200 to-purple-200 bg-clip-text text-transparent leading-tight">
+                Transform Your<br>
+                <span class="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                    FinOps Data
+                </span>
+            </h2>
+            <p class="text-xl md:text-2xl text-gray-300 mb-12 max-w-4xl mx-auto leading-relaxed animate-slide-up">
+                Convert your cloud billing data to the FOCUS specification with our powerful,
+                enterprise-grade transformation engine. Streamline your FinOps operations today.
+            </p>
+
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-slide-up"
+                style="animation-delay: 0.3s;">
+                <button
+                    class="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl font-semibold text-lg hover:from-cyan-400 hover:to-purple-500 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-cyan-500/25">
+                    <span class="flex items-center space-x-2">
+                        <span><a href="{{ url_for('converter_page') }}">Start Converting</a></span>
+                        <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </span>
+                </button>
+                <button
+                    class="px-8 py-4 border border-white/20 rounded-xl font-semibold text-lg hover:bg-white/10 transition-all duration-300 backdrop-blur-sm">
+                    Learn More
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section class="px-6 py-20">
+        <div class="max-w-7xl mx-auto">
+            <h3
+                class="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Powerful Features
+            </h3>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div
+                    class="group p-8 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 hover:border-cyan-500/50 transition-all duration-500 hover:transform hover:scale-105 animate-slide-up">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-r from-cyan-400 to-cyan-600 rounded-xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform duration-300">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4 text-white">Real-time Conversion</h4>
+                    <p class="text-gray-300 leading-relaxed">
+                        Transform your billing data instantly with our high-performance conversion engine.
+                        Process millions of records in seconds.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="group p-8 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 hover:border-purple-500/50 transition-all duration-500 hover:transform hover:scale-105 animate-slide-up"
+                    style="animation-delay: 0.2s;">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform duration-300">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4 text-white">FOCUS Compliant</h4>
+                    <p class="text-gray-300 leading-relaxed">
+                        Ensure 100% compliance with the latest FOCUS specification.
+                        Automatic validation and error reporting included.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="group p-8 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 hover:border-pink-500/50 transition-all duration-500 hover:transform hover:scale-105 animate-slide-up"
+                    style="animation-delay: 0.4s;">
+                    <div
+                        class="w-12 h-12 bg-gradient-to-r from-pink-400 to-pink-600 rounded-xl flex items-center justify-center mb-6 group-hover:rotate-12 transition-transform duration-300">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-4 text-white">Enterprise Scale</h4>
+                    <p class="text-gray-300 leading-relaxed">
+                        Built for enterprise workloads with advanced security,
+                        monitoring, and scalability features.
+                    </p>
+                    © 2025 FOCUS Converter. Transforming FinOps data with precision and scale.
+                    </p>
+                </div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="px-6 py-20 bg-gradient-to-r from-black/20 to-purple-900/20 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid md:grid-cols-4 gap-8 text-center">
+                <div class="animate-slide-up">
+                    <div class="text-4xl font-bold text-cyan-400 mb-2">99.9%</div>
+                    <div class="text-gray-300">Conversion Accuracy</div>
+                </div>
+                <div class="animate-slide-up" style="animation-delay: 0.1s;">
+                    <div class="text-4xl font-bold text-purple-400 mb-2">1M+</div>
+                    <div class="text-gray-300">Records Processed</div>
+                </div>
+                <div class="animate-slide-up" style="animation-delay: 0.2s;">
+                    <div class="text-4xl font-bold text-pink-400 mb-2">50ms</div>
+                    <div class="text-gray-300">Average Response</div>
+                </div>
+                <div class="animate-slide-up" style="animation-delay: 0.3s;">
+                    <div class="text-4xl font-bold text-green-400 mb-2">24/7</div>
+                    <div class="text-gray-300">Uptime Guarantee</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="px-6 py-20">
+        <div class="max-w-4xl mx-auto text-center">
+            <h3
+                class="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Ready to Transform Your Data?
+            </h3>
+            <p class="text-xl text-gray-300 mb-8">
+                Join thousands of organizations already using FOCUS Converter
+                to standardize their cloud cost data.
+            </p>
+            <button
+                class="group px-10 py-5 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl font-semibold text-xl hover:from-cyan-400 hover:to-purple-500 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-cyan-500/25">
+                <span class="flex items-center space-x-2">
+                    <span><a href="{{ url_for('converter_page') }}">Get Started Now</a></span>
+                    <svg class="w-6 h-6 group-hover:translate-x-1 transition-transform duration-300" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </span>
+            </button>
+        </div>
+    </section>
+</main>
+
+{% endblock %}>
+{% block scripts %}
+<script src="/static/js/main_page.js"></script>
+{% endblock %}

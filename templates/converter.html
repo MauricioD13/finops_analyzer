@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" type="text/css" href="/static/css/converter_page.css">
+{% endblock %}
+
+{% block content %}
+<!-- Animated background elements -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute -inset-10 opacity-20">
+        <div
+            class="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl animate-float">
+        </div>
+        <div class="absolute top-3/4 right-1/4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
+            style="animation-delay: 2s;"></div>
+        <div class="absolute bottom-1/4 left-1/2 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl animate-float"
+            style="animation-delay: 4s;"></div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="relative z-10">
+    <!-- Hero Section -->
+    <section class="px-6 py-12">
+        <div class="max-w-4xl mx-auto text-center animate-fade-in">
+            <h2
+                class="text-4xl md:text-5xl font-extrabold mb-6 bg-gradient-to-r from-white via-cyan-200 to-purple-200 bg-clip-text text-transparent leading-tight">
+                Transform Your
+                <span class="bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                    FinOps Data
+                </span>
+            </h2>
+            <p class="text-lg text-gray-300 mb-8 max-w-3xl mx-auto leading-relaxed animate-slide-up">
+                Convert your cloud billing data to the FOCUS specification with our powerful transformation engine.
+            </p>
+        </div>
+    </section>
+
+    <!-- Converter Form Section -->
+    <section class="px-6 py-8">
+        <div class="max-w-4xl mx-auto">
+            <div
+                class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 shadow-2xl animate-slide-up">
+                <h4
+                    class="text-2xl font-semibold mb-8 text-white bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
+                    FOCUS Converter
+                </h4>
+
+                <form class="space-y-6" id="converter-form" hx-post="{{ url_for('converter_post') }}"
+                    hx-encoding="multipart/form-data" hx-target="#response-area" hx-indicator="#loading-indicator">
+                    <!-- Provider Detection -->
+                    <div class="form-group animate-slide-up" style="animation-delay: 0.1s;">
+                        <label for="provider-detection" class="block text-sm font-medium text-white mb-2">
+                            Provider Detection
+                        </label>
+                        <div class="relative">
+                            <select id="provider-detection" name="provider_detection"
+                                class="w-full appearance-none rounded-lg bg-white/5 py-3 pr-10 pl-4 text-white outline-none border border-white/10 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 hover:bg-white/10">
+                                <option value="manual">Manual</option>
+                                <option value="automatic">Automatic</option>
+                            </select>
+                            <svg viewBox="0 0 16 16" fill="currentColor"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none">
+                                <path
+                                    d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+                                    clip-rule="evenodd" fill-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Provider Selection -->
+                    <div class="form-group animate-slide-up" style="animation-delay: 0.2s;">
+                        <label for="provider" class="block text-sm font-medium text-white mb-2">
+                            Cloud Provider
+                        </label>
+                        <div class="relative">
+                            <select id="provider" name="provider"
+                                class="w-full appearance-none rounded-lg bg-white/5 py-3 pr-10 pl-4 text-white outline-none border border-white/10 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 hover:bg-white/10">
+                                <option value="aws">Amazon Web Services (AWS)</option>
+                                <option value="azure">Microsoft Azure</option>
+                                <option value="gcp">Google Cloud Platform (GCP)</option>
+                                <option value="oracle">Oracle Cloud</option>
+                            </select>
+                            <svg viewBox="0 0 16 16" fill="currentColor"
+                                class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none">
+                                <path
+                                    d="M4.22 6.22a.75.75 0 0 1 1.06 0L8 8.94l2.72-2.72a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 0-1.06Z"
+                                    clip-rule="evenodd" fill-rule="evenodd" />
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="form-group animate-slide-up" style="animation-delay: 0.3s;">
+                        <label class="block text-sm font-medium text-white mb-2">
+                            Upload Billing Data
+                        </label>
+                        <div class="mt-2 flex justify-center rounded-lg border-2 border-dashed border-white/25 px-6 py-12 hover:border-cyan-400/50 transition-all duration-300 hover:bg-white/5"
+                            id="drop-zone">
+                            <div class="text-center">
+                                <svg viewBox="0 0 24 24" fill="currentColor"
+                                    class="mx-auto h-16 w-16 text-gray-400 mb-4">
+                                    <path
+                                        d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+                                        clip-rule="evenodd" fill-rule="evenodd" />
+                                </svg>
+                                <div class="flex text-sm text-gray-400 justify-center">
+                                    <label for="file-upload"
+                                        class="relative cursor-pointer rounded-md font-semibold text-cyan-400 hover:text-cyan-300 transition-colors duration-300">
+                                        <span class="text-lg">Upload a file</span>
+                                        <input id="file-upload" type="file" name="file_upload" class="sr-only"
+                                            accept=".csv,.parquet,.json" />
+                                    </label>
+                                    <p class="pl-2 text-lg">or drag and drop</p>
+                                </div>
+                                <p class="text-sm text-gray-400 mt-2">CSV, Parquet, JSON up to 100MB</p>
+                                <div id="file-info" class="mt-4 hidden">
+                                    <div
+                                        class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-green-500/20 text-green-400 border border-green-500/30">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span id="file-name" class="mr-2"></span>
+                                        <button type="button" id="remove-file"
+                                            class="ml-2 p-1 hover:bg-red-500/20 rounded-full transition-colors duration-200 group"
+                                            title="Remove file">
+                                            <svg class="w-3 h-3 text-green-400 group-hover:text-red-400 transition-colors duration-200"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Convert Button -->
+                    <div class="flex justify-center pt-6 animate-slide-up" style="animation-delay: 0.4s;">
+                        <button type="submit"
+                            class="group px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl font-semibold text-lg text-white hover:from-cyan-400 hover:to-purple-500 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-cyan-500/25 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                            id="convert-btn" disabled>
+                            <span class="flex items-center space-x-2">
+                                <span>Convert to FOCUS</span>
+                                <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform duration-300"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                                </svg>
+                            </span>
+                        </button>
+                    </div>
+
+                    <!-- Loading Indicator -->
+                    <div id="loading-indicator" class="htmx-indicator flex justify-center py-4">
+                        <div
+                            class="flex items-center space-x-3 px-6 py-3 bg-white/10 backdrop-blur-lg rounded-lg border border-white/20">
+                            <svg class="animate-spin w-6 h-6 text-cyan-400" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                    stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                                </path>
+                            </svg>
+                            <span class="text-white font-medium">Converting your data...</span>
+                        </div>
+                    </div>
+
+                    <!-- Response Area -->
+                    <div id="response-area" class="mt-6"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="px-6 py-16">
+        <div class="max-w-6xl mx-auto">
+            <h3
+                class="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Why Choose Our Converter?
+            </h3>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div
+                    class="group p-6 rounded-xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 hover:border-cyan-500/50 transition-all duration-300 animate-slide-up">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-r from-cyan-400 to-cyan-600 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-semibold mb-2 text-white">Lightning Fast</h4>
+                    <p class="text-gray-300 text-sm">Process millions of records in seconds with our optimized
+                        conversion engine.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="group p-6 rounded-xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 hover:border-purple-500/50 transition-all duration-300 animate-slide-up"
+                    style="animation-delay: 0.1s;">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-r from-purple-400 to-purple-600 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-semibold mb-2 text-white">100% Compliant</h4>
+                    <p class="text-gray-300 text-sm">Guaranteed compliance with the latest FOCUS specification
+                        standards.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="group p-6 rounded-xl bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 hover:border-pink-500/50 transition-all duration-300 animate-slide-up"
+                    style="animation-delay: 0.2s;">
+                    <div
+                        class="w-10 h-10 bg-gradient-to-r from-pink-400 to-pink-600 rounded-lg flex items-center justify-center mb-4">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h4 class="text-lg font-semibold mb-2 text-white">Secure</h4>
+                    <p class="text-gray-300 text-sm">Enterprise-grade security with end-to-end encryption and data
+                        protection.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/converter_page.js"></script>
+
+{% endblock %}
