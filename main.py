@@ -2,7 +2,7 @@ from typing import Union
 
 from fastapi import FastAPI, UploadFile, File, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from finops_analyzer.api.v1.pages import router as pages_v1_router
 from finops_analyzer.api.deps import templates
 
@@ -32,12 +32,22 @@ async def converter_post(
         provider: str = None,
         provider_detection: str = None, 
     ):
-    print(f"Request: {request}")
-    url_str = request.url
-    query_str = request.body
-    print(f"Request object: {url_str} - {query_str}")
+    if provider:
+        print(f"Provider: {provider}")
+    if provider_detection:
+        print(f"Provider detection: {provider_detection}")
+    else:
+        print("Params not received")
+    #print(f"Request: {request}")
+    #url_str = request.url
+    try:
+        query_str = await request.form()
+        print(f"Request object: {query_str}")
+    except Exception as e:
+        print(e)
+    
     filename = file_upload.filename
     content = await file_upload.read()
     print(f"Received file: {filename} with size {len(content)} bytes")
     # Process form data here
-    return templates.TemplateResponse("converter.html", {"request": request, "message": "File processed"})
+    return JSONResponse(content={"message":"File succesful process"})
