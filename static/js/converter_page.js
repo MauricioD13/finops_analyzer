@@ -5,7 +5,9 @@ document.addEventListener("DOMContentLoaded", function () {
   const fileName = document.getElementById("file-name");
   const removeFileBtn = document.getElementById("remove-file");
   const convertBtn = document.getElementById("convert-btn");
-
+  const selectProviderDetection = document.getElementById("provider_detection");
+  const selectProviderGroup = document.getElementById("provider-group");
+  selectProviderGroup.hidden = true;
   // File upload handling
   fileUpload.addEventListener("change", handleFileSelect);
   removeFileBtn.addEventListener("click", handleFileRemove);
@@ -14,6 +16,16 @@ document.addEventListener("DOMContentLoaded", function () {
   dropZone.addEventListener("dragover", handleDragOver);
   dropZone.addEventListener("dragleave", handleDragLeave);
   dropZone.addEventListener("drop", handleFileDrop);
+  selectProviderDetection.addEventListener("change", handleProviderDetection);
+
+  function handleProviderDetection(e) {
+    const provider_detection = selectProviderDetection.value;
+    if (provider_detection === "manual") {
+      selectProviderGroup.hidden = false;
+    } else {
+      selectProviderGroup.hidden = true;
+    }
+  }
 
   function handleFileSelect(e) {
     const file = e.target.files[0];
