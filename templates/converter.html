@@ -55,13 +55,10 @@
                             Provider Detection
                         </label>
                         <div class="relative">
-                            <select id="provider_detection" name="provider_detection"
-                                class="w-full appearance-none rounded-lg bg-white/5 py-3 pr-10 pl-4 text-white outline-none border border-white/10 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 hover:bg-white/10"
-                                hx-get="{{ url_for('converter') }}" hx-trigger="change" hx-push-url="true"
-                                hx-include="[name='provider'], [name='provider_detection']" hx-target="body"
-                                hx-swap="none">
+                             <select id="provider_detection" name="provider_detection"
+                                class="w-full appearance-none rounded-lg bg-white/5 py-3 pr-10 pl-4 text-white outline-none border border-white/10 focus:border-cyan-500/50 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300 hover:bg-white/10">
                                 <option value="manual">Manual</option>
-                                <option value="automatic">Automatic</option>
+                                <option value="automatic" selected>Automatic</option>
                             </select>
                             <svg viewBox="0 0 16 16" fill="currentColor"
                                 class="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none">
@@ -73,16 +70,13 @@
                     </div>
 
                     <!-- Provider Selection -->
-                    <div class="form-group animate-slide-up" style="animation-delay: 0.2s;">
+                    <div class="form-group animate-slide-up" style="animation-delay: 0.2s;" id="provider-group">
                         <label for="provider" class="block text-sm font-medium text-white mb-2">
                             Cloud Provider
                         </label>
                         <div class="relative">
                             <select id="provider" name="provider"
-                                class="w-full appearance-none rounded-lg bg-white/5 py-3 pr-10 pl-4 text-white outline-none border border-white/10 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 hover:bg-white/10"
-                                hx-get="{{ url_for('converter') }}" hx-trigger="change" hx-push-url="true"
-                                hx-include="[name='provider'], [name='provider_detection']" hx-target="body"
-                                hx-swap="none">
+                                class="w-full appearance-none rounded-lg bg-white/5 py-3 pr-10 pl-4 text-white outline-none border border-white/10 focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all duration-300 hover:bg-white/10">
                                 <option value="aws">Amazon Web Services (AWS)</option>
                                 <option value="azure">Microsoft Azure</option>
                                 <option value="gcp">Google Cloud Platform (GCP)</option>
