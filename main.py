@@ -1,15 +1,16 @@
-from typing import Union
+from typing import Union, Annotated
 
-from fastapi import FastAPI, UploadFile, File, Request
+from fastapi import FastAPI, UploadFile, File, Request, Form
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, JSONResponse
 from finops_analyzer.api.v1.pages import router as pages_v1_router
 from finops_analyzer.api.deps import templates
+from finops_analyzer import schemas
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(pages_v1_router, tags=["pages"])
-
+MAX_FILE_SIZE = 100 * 1024 * 1024  # 50 MB
 
 @app.get("/")
 def read_root():
@@ -28,26 +29,33 @@ async def create_upload_file(file: UploadFile = File(...)):
 @app.post("/converter")
 async def converter_post(
         request: Request,
-        file_upload: UploadFile,
-        provider: str = None,
-        provider_detection: str = None, 
+        file_upload: Annotated[UploadFile, File()],
+        provider_detection: Annotated[str, Form()],
+        provider: Annotated[str, Form()]
     ):
-    if provider:
-        print(f"Provider: {provider}")
-    if provider_detection:
-        print(f"Provider detection: {provider_detection}")
-    else:
-        print("Params not received")
-    #print(f"Request: {request}")
-    #url_str = request.url
-    try:
-        query_str = await request.form()
-        print(f"Request object: {query_str}")
-    except Exception as e:
-        print(e)
+    file_size = 0
+    chunk_size = 1024 * 1024  # 1 MB chunks
     
-    filename = file_upload.filename
-    content = await file_upload.read()
-    print(f"Received file: {filename} with size {len(content)} bytes")
-    # Process form data here
-    return JSONResponse(content={"message":"File succesful process"})
+    chunks = []
+    while chunk := await file_upload.read(chunk_size):
+        file_size += len(chunk)
+        
+        if file_size > MAX_FILE_SIZE:
+            raise HTTPException(
+                status_code=413,
+                detail=f"Archivo demasiado grande. Máximo: {MAX_FILE_SIZE / (1024*1024)} MB"
+            )
+        chunks.append(chunk)
+ 
+    # Reconstruir el contenido completo
+    contents = b''.join(chunks)
+    file_obj = schemas.ProcessFileRequest(
+        file_content=contents,
+        provider_detection=provider_detection
+        )
+    
+    return {
+        "filename": file_upload.filename,
+        "size_mb": file_size / (1024 * 1024),
+        "parametro": provider
+    }
