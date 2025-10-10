@@ -1,17 +1,16 @@
-FROM bitnami/python:latest
+FROM alpine:latest
+
+# Install Python and pipx
+RUN apk add --no-cache python3 py3-pip pipx
 
 # Set working directory
 WORKDIR /app
 
-# Update packages and install pipx
-RUN apt update && apt upgrade -y
-RUN apt install -y pipx
-
 # Install focus_converter and dependencies
-RUN pipx ensurepath && pipx install focus_converter
-RUN pipx inject focus-converter "typer==0.9.0" "click==8.0.4" && \
-    pipx inject focus-converter "pandera>=0.21,<0.22" &&  \
-    pipx inject focus-converter "multimethod<2"
+RUN pipx install focus_converter && \
+    pipx inject focus_converter "typer==0.9.0" "click==8.0.4" && \
+    pipx inject focus_converter "pandera>=0.21,<0.22" && \
+    pipx inject focus_converter "multimethod<2"
 
 # Add pipx bin to PATH
 ENV PATH="/root/.local/bin:$PATH"
@@ -21,4 +20,3 @@ RUN mkdir -p /app/workspace
 
 # Keep container running
 CMD ["tail", "-f", "/dev/null"]
-
