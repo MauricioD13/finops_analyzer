@@ -6,7 +6,7 @@ services:
       dockerfile: dockerfile.converter.yaml
     container_name: focus-converter
     ports:
-      - "8000:8000"
+      - "8001:8001"
     volumes:
       - ./input:/app/workspace
       - ./output:/app/output
