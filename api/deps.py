@@ -1,6 +1,6 @@
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from finops_analyzer.focus_converter import FocusConverterService
+from finops_analyzer.focus_converter.service import FocusConverterService
 
 templates = Jinja2Templates(directory="templates")
 
