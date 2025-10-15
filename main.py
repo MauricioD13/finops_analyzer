@@ -7,6 +7,7 @@ from finops_analyzer.api.v1.pages import router as pages_v1_router
 from finops_analyzer.api.deps import templates
 from finops_analyzer import schemas
 from finops_analyzer.api.deps import get_focus_converter_service
+from finops_analyzer.focus_converter.service import FocusConverterService
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -23,7 +24,7 @@ async def converter_post(
         file_upload: Annotated[UploadFile, File()],
         provider_detection: Annotated[str, Form()],
         provider: Annotated[str, Form()],
-        focus_converter_service: Depends(get_focus_converter_service) 
+        focus_converter_service: Annotated[FocusConverterService, Depends(get_focus_converter_service)]
     ):
     file_size = 0
     chunk_size = 1024 * 1024  # 1 MB chunks
@@ -41,16 +42,28 @@ async def converter_post(
  
     # Reconstruir el contenido completo
     contents = b''.join(chunks)
+    print(f"Path: {file_upload.file.name}, Name: {file_upload.filename}")
+    if file_upload.file.name is None:
+        # PENDIENTE: Caso en donde el archivo es pequeño y no escribe en un archivo, sino que lo deja en memoria
+        pass
     file_obj = schemas.ProcessFileRequest(
         file_content=contents,
         provider_detection=provider_detection,
         file_path=file_upload.file.name,
-        file_name=file.filename
+        file_name=file_upload.filename
         )
-    focus_converter_service.convert_file(file_obj)
-    
-    return {
-        "filename": file_upload.filename,
-        "size_mb": file_size / (1024 * 1024),
-        "parametro": provider
-    }
+    result = focus_converter_service.convert_file(file_obj)
+    if result:
+        return {
+            "filename": file_upload.filename,
+            "size_mb": file_size / (1024 * 1024),
+            "parametro": provider,
+            "convertion": "successful"
+        }
+    else:
+        return {
+            "filename": file_upload.filename,
+            "size_mb": file_size / (1024 * 1024),
+            "parametro": provider,
+            "convertion": "failed"
+        }
