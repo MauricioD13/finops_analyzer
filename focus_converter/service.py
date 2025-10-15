@@ -38,9 +38,9 @@ class FocusConverterService:
             ])
         result = subprocess.run(command)
         if result.returncode == 0:
-            return {"message":"Conversion success"}
+            return True
         else:
-            return {"message":"Conversion error"}
+            return False
 
     @staticmethod
     def get_file_type(file_name: str):
