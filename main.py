@@ -1,12 +1,12 @@
 from typing import Union, Annotated
 
-from fastapi import FastAPI, UploadFile, File, Request, Form
+from fastapi import FastAPI, UploadFile, File, Request, Form, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, JSONResponse
 from finops_analyzer.api.v1.pages import router as pages_v1_router
 from finops_analyzer.api.deps import templates
 from finops_analyzer import schemas
-from finops_analyzer.focus_converter import FocusConverterService
+from finops_analyzer.api.deps import get_focus_converter_service
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -22,7 +22,8 @@ async def converter_post(
         request: Request,
         file_upload: Annotated[UploadFile, File()],
         provider_detection: Annotated[str, Form()],
-        provider: Annotated[str, Form()]
+        provider: Annotated[str, Form()],
+        focus_converter_service: Depends(get_focus_converter_service) 
     ):
     file_size = 0
     chunk_size = 1024 * 1024  # 1 MB chunks
@@ -42,8 +43,11 @@ async def converter_post(
     contents = b''.join(chunks)
     file_obj = schemas.ProcessFileRequest(
         file_content=contents,
-        provider_detection=provider_detection
+        provider_detection=provider_detection,
+        file_path=file_upload.file.name,
+        file_name=file.filename
         )
+    focus_converter_service.convert_file(file_obj)
     
     return {
         "filename": file_upload.filename,
