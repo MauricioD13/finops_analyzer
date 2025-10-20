@@ -1,4 +1,5 @@
 import subprocess
+import os
 from finops_analyzer import schemas
 from pathlib import Path
 
@@ -10,10 +11,10 @@ class FocusConverterService:
         --data-path /app/workspace/truncated_data_cur.csv 
         --export-format csv --export-path /app/output/
         """
-        base_command = ["docker","exec",container_name,"focus-converter"]
+        self.base_command = ["docker","exec",container_name,"focus-converter"]
 
     def convert_file(self, file_obj: schemas.ProcessFileRequest) -> dict:
-        self.command = base_command.copy()
+        self.command = self.base_command.copy()
         if file_obj.provider_detection == "manual":
             self.command.extend([
                 "convert",
@@ -36,7 +37,10 @@ class FocusConverterService:
                 "--export-path",
                 "/app/output/"
             ])
-        result = subprocess.run(command)
+        print(f"User: {os.getenv('USER')}")
+        print(f"Command: {self.command}")
+        result = subprocess.run(self.command)
+        print(f"Resultado: {result}")
         if result.returncode == 0:
             return True
         else:
