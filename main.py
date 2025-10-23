@@ -5,6 +5,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, JSONResponse
 import os
 import subprocess
+import shutil
+from pathlib import Path
 
 from finops_analyzer.api.v1.pages import router as pages_v1_router
 from finops_analyzer.api.deps import templates
@@ -56,21 +58,24 @@ async def converter_post(
     # Reconstruir el contenido completo
     contents = b''.join(chunks)
     print(f"Path: {file_upload.file.name}, Name: {file_upload.filename}")
-        
-    
     if file_upload.file.name is None:
         # Create a named temporary file
-        with tempfile.NamedTemporaryFile(mode='w+t', delete=True, suffix=".txt", dir="/INp") as named_temp_file:
-            named_temp_file.write("More temporary content.")
-            named_temp_file.seek(0)
-            file_path = named_temp_file.name
+        with tempfile.NamedTemporaryFile(mode='w', delete=True,suffix=Path(file_upload.filename).suffix, dir="./deploy/dev/input/") as input_temp_file:
+            shutil.copyfileobj(file_upload.file, input_temp_file)
+            input_temp_file.flush()
+            # Process the file here
+            input_temp_file.seek(0)  # Reset file pointer to beginning
             file_obj = schemas.ProcessFileRequest(
                 file_content=contents,
                 provider_detection=provider_detection,
-                file_path=file_path,
-                file_name=file_upload.filename
+                file_path=input_temp_file.name,
+                file_name=Path(input_temp_file.name).name
             )
-            result = focus_converter_service.convert_file(file_obj)
+            try:
+                result = focus_converter_service.convert_file(file_obj)
+            except Exception as e:
+                print(f"Error: {e}, File att: {file_obj.dump_model()}")
+                exit(1)
             
     else:
         file_obj = schemas.ProcessFileRequest(
