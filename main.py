@@ -60,22 +60,31 @@ async def converter_post(
     print(f"Path: {file_upload.file.name}, Name: {file_upload.filename}")
     if file_upload.file.name is None:
         # Create a named temporary file
-        with tempfile.NamedTemporaryFile(mode='w', delete=True,suffix=Path(file_upload.filename).suffix, dir="./deploy/dev/input/") as input_temp_file:
-            shutil.copyfileobj(file_upload.file, input_temp_file)
+        input_temp_file = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix=Path(file_upload.filename).suffix, dir="./deploy/dev/input/")
+        try:
+            # Write the contents to the temp file
+            input_temp_file.write(contents)
             input_temp_file.flush()
-            # Process the file here
-            input_temp_file.seek(0)  # Reset file pointer to beginning
+            input_temp_file.close()  # Close the file so Docker can access it
+            
             file_obj = schemas.ProcessFileRequest(
                 file_content=contents,
                 provider_detection=provider_detection,
+                provider=provider,
                 file_path=input_temp_file.name,
                 file_name=Path(input_temp_file.name).name
             )
             try:
                 result = focus_converter_service.convert_file(file_obj)
             except Exception as e:
-                print(f"Error: {e}, File att: {file_obj.dump_model()}")
-                exit(1)
+                print(f"Error: {e}, File att: {file_obj.model_dump()}")
+                raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+        finally:
+            # Clean up the temporary file after processing
+            try:
+                os.unlink(input_temp_file.name)
+            except OSError:
+                pass  # File might already be deleted
             
     else:
         file_obj = schemas.ProcessFileRequest(
