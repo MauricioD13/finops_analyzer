@@ -1,22 +1,31 @@
 import tempfile
 from typing import Union, Annotated
-from fastapi import FastAPI, UploadFile, File, Request, Form, Depends
+from fastapi import FastAPI, UploadFile, File, Request, Form, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse, JSONResponse
+from fastapi.responses import RedirectResponse, JSONResponse, FileResponse
 import os
 import subprocess
 import shutil
 from pathlib import Path
-
+# Local imports
 from finops_analyzer.api.v1.pages import router as pages_v1_router
 from finops_analyzer.api.deps import templates
 from finops_analyzer import schemas
-from finops_analyzer.api.deps import get_focus_converter_service
-from finops_analyzer.focus_converter.service import FocusConverterService
+from finops_analyzer.api.deps import get_focus_converter_service, get_file_deleter_service
+from finops_analyzer.focus_converter.service import FocusConverterService, FileDeleterService
+from finops_analyzer.logger import get_logger
+from finops_analyzer.middleware.delete_files import file_deletion_middleware
+
+logger = get_logger()
 
 app = FastAPI()
+
+# Register middleware
+app.middleware("http")(file_deletion_middleware)
+
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(pages_v1_router, tags=["pages"])
+
 MAX_FILE_SIZE = 100 * 1024 * 1024  # 50 MB
 
 
@@ -39,12 +48,13 @@ async def converter_post(
         file_upload: Annotated[UploadFile, File()],
         provider_detection: Annotated[str, Form()],
         provider: Annotated[str, Form()],
-        focus_converter_service: Annotated[FocusConverterService, Depends(get_focus_converter_service)]
+        focus_converter_service: Annotated[FocusConverterService, Depends(get_focus_converter_service)],
     ):
     file_size = 0
     chunk_size = 1024 * 1024  # 1 MB chunks
     
     chunks = []
+    logger.debug("Start receiving file")
     while chunk := await file_upload.read(chunk_size):
         file_size += len(chunk)
         
@@ -57,34 +67,28 @@ async def converter_post(
  
     # Reconstruir el contenido completo
     contents = b''.join(chunks)
-    print(f"Path: {file_upload.file.name}, Name: {file_upload.filename}")
     if file_upload.file.name is None:
+        logger.debug("Content is in memory, don't has a file")
         # Create a named temporary file
-        input_temp_file = tempfile.NamedTemporaryFile(mode='wb', delete=False, suffix=Path(file_upload.filename).suffix, dir="./deploy/dev/input/")
-        try:
-            # Write the contents to the temp file
+        with tempfile.NamedTemporaryFile(mode='wb', delete=True,suffix=Path(file_upload.filename).suffix, dir="./deploy/dev/input/") as input_temp_file:
             input_temp_file.write(contents)
             input_temp_file.flush()
-            input_temp_file.close()  # Close the file so Docker can access it
-            
+            # Process the file here
+            input_temp_file.seek(0)  # Reset file pointer to beginning
+            logger.debug("File created with the content")
             file_obj = schemas.ProcessFileRequest(
                 file_content=contents,
                 provider_detection=provider_detection,
-                provider=provider,
                 file_path=input_temp_file.name,
                 file_name=Path(input_temp_file.name).name
             )
             try:
+                logger.debug("Start convertion")
                 result = focus_converter_service.convert_file(file_obj)
+                logger.debug("Finish convertion")
             except Exception as e:
-                print(f"Error: {e}, File att: {file_obj.model_dump()}")
-                raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
-        finally:
-            # Clean up the temporary file after processing
-            try:
-                os.unlink(input_temp_file.name)
-            except OSError:
-                pass  # File might already be deleted
+                print(f"Error: {e}, File att: {file_obj.dump_model()}")
+                exit(1)
             
     else:
         file_obj = schemas.ProcessFileRequest(
@@ -94,6 +98,7 @@ async def converter_post(
                 file_name=file_upload.filename
             )
         result = focus_converter_service.convert_file(file_obj)
+    
     if result:
         return {
             "filename": file_upload.filename,
