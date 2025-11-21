@@ -12,10 +12,11 @@ async def file_deletion_middleware(request: Request, call_next):
     # Only run cleanup after converter endpoint
     if request.url.path == "/converter" and request.method == "POST":
         try:
+            file_name = getattr(request.state, "full_file_name", None)
             file_deleter_service = get_file_deleter_service()
-            res_deletion = file_deleter_service.delete_all_files("./deploy/dev/output/")
+            res_deletion = file_deleter_service.delete_file(directory_path="./deploy/dev/output/", file_name=file_name)
             logger.debug(
-                f"Finish deleting files: Message - {res_deletion.get('message', None)} "
+                f"Finish deleting files: Message - {res_deletion.get('message', None)}" +
                 f"Deleted files - {res_deletion.get('deleted_count')}"
             )
         except Exception as e:
