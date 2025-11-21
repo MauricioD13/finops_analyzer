@@ -8,3 +8,4 @@ class ProcessFileRequest(BaseModel):
     file_content: bytes = Field(..., description="Content of the uploaded file")
     file_path: str = Field(max_length=2000, description="Temp file path")
     file_name: str = Field(max_length=2000, description="File name")
+    output_filename: Optional[str] = Field(None, description="Output file name")
