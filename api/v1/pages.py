@@ -15,3 +15,7 @@ async def main_page(request: Request):
 async def converter_page(request: Request):
     return templates.TemplateResponse("converter.html", {"request": request})
 
+@router.get("/analytics")
+async def analytics_page(request: Request):
+    return templates.TemplateResponse("analytics.html", {"request": request})
+
