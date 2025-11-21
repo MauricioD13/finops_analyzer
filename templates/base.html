@@ -19,7 +19,7 @@
         <!-- Navigation -->
         <nav class="relative z-10 px-6 py-4 backdrop-blur-lg bg-white/5 border-b border-white/10">
             <div class="max-w-7xl mx-auto flex items-center justify-between">
-                <div class="flex items-center space-x-2">
+                <a href="{{ url_for('main_page') }}" class="flex items-center space-x-2 cursor-pointer hover:opacity-80 transition-opacity duration-300">
                     <div
                         class="w-8 h-8 bg-gradient-to-r from-cyan-400 to-purple-500 rounded-lg flex items-center justify-center">
                         <span class="text-white font-bold text-sm">F</span>
@@ -28,13 +28,14 @@
                         class="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-500 bg-clip-text text-transparent">
                         FOCUS Converter
                     </h1>
-                </div>
+                </a>
                 <div class="hidden md:flex space-x-6">
                     <a href="{{ url_for('main_page') }}"
                         class="text-white hover:text-cyan-400 transition-colors duration-300">Inicio</a>
                     <a href="{{ url_for('converter_page') }}"
                         class="text-white hover:text-cyan-400 transition-colors duration-300">Convert</a>
-                    <a href="#" class="text-white hover:text-cyan-400 transition-colors duration-300">Analytics</a>
+                    <a href="{{ url_for('analytics_page') }}"
+                        class="text-white hover:text-cyan-400 transition-colors duration-300">Analytics</a>
                     <a href="#" class="text-white hover:text-cyan-400 transition-colors duration-300">Settings</a>
                 </div>
             </div>
