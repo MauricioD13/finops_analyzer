@@ -1,6 +1,6 @@
 import tempfile
 from typing import Union, Annotated
-from fastapi import FastAPI, UploadFile, File, Request, Form, Depends, HTTPException
+from fastapi import FastAPI, UploadFile, File, Request, Form, Depends, HTTPException, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse, JSONResponse, FileResponse
 import os
@@ -14,14 +14,15 @@ from finops_analyzer import schemas
 from finops_analyzer.api.deps import get_focus_converter_service, get_file_deleter_service
 from finops_analyzer.focus_converter.service import FocusConverterService, FileDeleterService
 from finops_analyzer.logger import get_logger
-from finops_analyzer.middleware.delete_files import file_deletion_middleware
 
 logger = get_logger()
 
 app = FastAPI()
+# Create upload directory
 
-# Register middleware
-app.middleware("http")(file_deletion_middleware)
+UPLOAD_DIR = Path("deploy/dev/input/")
+BASE_OUTPUT_NAME="focus-converted-output"
+UPLOAD_DIR.mkdir(exist_ok=True)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(pages_v1_router, tags=["pages"])
@@ -49,7 +50,10 @@ async def converter_post(
         provider_detection: Annotated[str, Form()],
         provider: Annotated[str, Form()],
         focus_converter_service: Annotated[FocusConverterService, Depends(get_focus_converter_service)],
+        deleter_service: Annotated[FileDeleterService, Depends(get_file_deleter_service)]
     ):
+    
+    
     file_size = 0
     chunk_size = 1024 * 1024  # 1 MB chunks
     
@@ -70,17 +74,19 @@ async def converter_post(
     if file_upload.file.name is None:
         logger.debug("Content is in memory, don't has a file")
         # Create a named temporary file
-        with tempfile.NamedTemporaryFile(mode='wb', delete=True,suffix=Path(file_upload.filename).suffix, dir="./deploy/dev/input/") as input_temp_file:
+        with tempfile.NamedTemporaryFile(mode='wb', delete=True,suffix=Path(file_upload.filename).suffix, dir=UPLOAD_DIR) as input_temp_file:
             input_temp_file.write(contents)
             input_temp_file.flush()
             # Process the file here
             input_temp_file.seek(0)  # Reset file pointer to beginning
             logger.debug("File created with the content")
+            output_filename = BASE_OUTPUT_NAME+str(hash(Path(input_temp_file.name).name))
             file_obj = schemas.ProcessFileRequest(
                 file_content=contents,
                 provider_detection=provider_detection,
                 file_path=input_temp_file.name,
-                file_name=Path(input_temp_file.name).name
+                file_name=Path(input_temp_file.name).name,
+                output_filename=output_filename
             )
             try:
                 logger.debug("Start convertion")
@@ -91,25 +97,55 @@ async def converter_post(
                 exit(1)
             
     else:
+        output_filename = BASE_OUTPUT_NAME+str(hash(file_upload.filename))
+        logger.debug(f"File has a path in disk: {file_upload.file.name}, {file_upload.filename}")
+        file_location = f"{UPLOAD_DIR}/{file_upload.filename}"
+
+    # Save uploaded file locally - use the contents we already read
+        with open(file_location, "wb") as buffer:
+            buffer.write(contents)
+
         file_obj = schemas.ProcessFileRequest(
                 file_content=contents,
                 provider_detection=provider_detection,
-                file_path=file_upload.file.name,
-                file_name=file_upload.filename
+                file_path=file_location,
+                file_name=file_upload.filename,
+                output_filename=output_filename
             )
         result = focus_converter_service.convert_file(file_obj)
-    
-    if result:
-        return {
+        deleter_service.delete_file(directory_path=str(UPLOAD_DIR), file_name=file_upload.filename)
+    # Store filename for potential middleware cleanup
+    download_file = output_filename + "." + result.get("file_type", "csv")
+    request.state.full_file_name = download_file
+
+    # Return HTML template instead of JSON for HTMX
+    if result.get("status", False):
+        return templates.TemplateResponse("partials/download_button.html", {
+            "request": request,
             "filename": file_upload.filename,
             "size_mb": file_size / (1024 * 1024),
-            "parametro": provider,
-            "convertion": "successful"
-        }
+            "download_file": download_file
+        })
     else:
-        return {
+        return templates.TemplateResponse("partials/conversion_error.html", {
+            "request": request,
             "filename": file_upload.filename,
-            "size_mb": file_size / (1024 * 1024),
-            "parametro": provider,
-            "convertion": "failed"
-        }
+            "error": result.get("error", "Unknown error occurred")
+        })
+        
+@app.get("/download/{file_name}")
+def download_file(file_name: str, background_tasks: BackgroundTasks, file_deleter_service: Annotated[FileDeleterService, Depends(get_file_deleter_service)]):
+    file_path = f"./deploy/dev/output/{file_name}"
+    if os.path.exists(file_path):
+        background_tasks.add_task(
+            file_deleter_service.delete_file,
+            directory_path="./deploy/dev/output/",
+            file_name=file_name
+        )
+        return FileResponse(
+            path=file_path,
+            filename=file_name,
+            media_type='application/octet-stream'
+        )
+    else:
+        raise HTTPException(status_code=404, detail="File not found")
