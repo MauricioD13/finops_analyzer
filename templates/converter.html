@@ -39,6 +39,21 @@
     <!-- Converter Form Section -->
     <section class="px-6 py-8">
         <div class="max-w-4xl mx-auto">
+            <!-- Security Warning Banner -->
+            <div class="mb-6 bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 rounded-xl p-4 animate-slide-up backdrop-blur-sm">
+                <div class="flex items-start space-x-3">
+                    <div class="flex-shrink-0">
+                        <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <h5 class="text-sm font-semibold text-amber-400 mb-1">File Retention Policy</h5>
+                        <p class="text-xs text-gray-300">Converted files are automatically deleted after download or after 15 minutes for security. Please download your file promptly after conversion.</p>
+                    </div>
+                </div>
+            </div>
+
             <div
                 class="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 rounded-2xl p-8 shadow-2xl animate-slide-up">
                 <h4
@@ -46,9 +61,11 @@
                     FOCUS Converter
                 </h4>
 
-                <form class="space-y-6" id="converter-form" hx-post="{{ url_for('converter_post') }}"
-                    hx-encoding="multipart/form-data" hx-target="#response-area" hx-indicator="#loading-indicator"
-                    hx-params="*">
+                <form class="space-y-6" id="converter-form"
+                    hx-post="/converter"
+                    hx-target="#response-area"
+                    hx-indicator="#loading-indicator"
+                    hx-encoding="multipart/form-data">
                     <!-- Provider Detection -->
                     <div class="form-group animate-slide-up" style="animation-delay: 0.1s;">
                         <label for="provider_detection" class="block text-sm font-medium text-white mb-2">

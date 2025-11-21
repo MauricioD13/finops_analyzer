@@ -1,0 +1,47 @@
+<div class="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-xl p-6 animate-fade-in backdrop-blur-sm">
+  <div class="flex items-start space-x-4">
+    <div class="flex-shrink-0">
+      <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+    </div>
+    <div class="flex-1">
+      <h4 class="text-xl font-semibold text-green-400 mb-2">Conversion Successful!</h4>
+      <p class="text-gray-300 mb-4">Your file <span class="font-semibold text-white">{{ filename }}</span> has been converted to FOCUS format.</p>
+      <div class="flex flex-wrap gap-3 text-sm text-gray-400 mb-4">
+        <span class="flex items-center">
+          <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+          </svg>
+          Size: {{ "%.2f"|format(size_mb) }} MB
+        </span>
+      </div>
+
+      <!-- Deletion Warning -->
+      <div class="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
+        <div class="flex items-start space-x-2">
+          <svg class="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <p class="text-xs text-amber-200">
+            <span class="font-semibold">Important:</span> This file will be automatically deleted after download or in 15 minutes. Please download it now.
+          </p>
+        </div>
+      </div>
+
+      <button
+        id="download-btn"
+        data-filename="{{ download_file }}"
+        class="group inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 rounded-lg text-white font-semibold transition-all duration-300 shadow-lg hover:shadow-green-500/25 transform hover:scale-105">
+        <svg class="w-5 h-5 mr-2 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+          </path>
+        </svg>
+        Download Converted File
+      </button>
+    </div>
+  </div>
+</div>
