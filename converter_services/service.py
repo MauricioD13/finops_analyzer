@@ -7,8 +7,8 @@ from pathlib import Path
 import time
 
 # Local Imports
-from finops_analyzer import schemas
-from finops_analyzer.logger import logger
+import schemas
+from logger import logger
 
 class FileDeleterService:
     def __init__(self):
@@ -102,59 +102,90 @@ class FileDeleterService:
             return {"message": "failed", "error": str(e)}
 
 class FocusConverterService:
-    def __init__(self, container_name: str):
+    def __init__(self, input_dir: str = "./deploy/dev/input", output_dir: str = "./deploy/dev/output"):
         """
-        focus-converter convert-auto \
-        --data-path /app/workspace/file.csv \
-        --export-format csv \
-        --export-path /app/output/ \
-        --basename-template "converted_data_{i}"
-        AUTO
-        docker exec focus-converter focus-converter convert-auto 
-        --data-path /app/workspace/truncated_data_cur.csv 
-        --export-format csv --export-path /app/output/
+        Service to call focus-converter CLI directly (no docker exec needed).
+
+        Args:
+            input_dir: Directory where input files are stored
+            output_dir: Directory where converted files will be written
         """
-        self.base_command = ["docker","exec",container_name,"focus-converter"]
+        self.input_dir = input_dir
+        self.output_dir = output_dir
+
+        # Ensure directories exist
+        os.makedirs(self.input_dir, exist_ok=True)
+        os.makedirs(self.output_dir, exist_ok=True)
 
     def convert_file(self, file_obj: schemas.ProcessFileRequest) -> dict:
-        self.command = self.base_command.copy()
-        # Convert host path to container path
-        #container_path = self._host_to_container_path(file_obj.file_path)
+        """
+        Convert cloud billing file to FOCUS format using focus-converter CLI.
+
+        Args:
+            file_obj: Request object containing file details and conversion parameters
+
+        Returns:
+            dict: Conversion result with status and file_type or error message
+        """
         file_type = self.get_file_type(file_name=file_obj.file_name)
+
+        # Build input and output paths
+        input_path = os.path.join(self.input_dir, file_obj.file_name)
+        output_path = self.output_dir + "/"  # focus-converter expects trailing slash
+
+        # Build the command
+        command = ["focus-converter"]
+
         if file_obj.provider_detection == "manual":
-            self.command.extend([
+            command.extend([
                 "convert",
                 "--provider",
                 file_obj.provider,
                 "--data-path",
-                "/app/workspace/"+file_obj.file_name,
+                input_path,
                 "--export-format",
                 file_type,
                 "--export-path",
-                "/app/output/",
+                output_path,
                 "--basename-template",
                 file_obj.output_filename
             ])
         else:
-            self.command.extend([
+            command.extend([
                 "convert-auto",
                 "--data-path",
-                "/app/workspace/"+file_obj.file_name,
+                input_path,
                 "--export-format",
                 file_type,
                 "--export-path",
-                "/app/output/",
+                output_path,
                 "--basename-template",
                 file_obj.output_filename
             ])
-        logger.debug("Begging convert process")
-        result = subprocess.run(self.command, capture_output=True)
-        
-        if result.returncode == 0:
-            return {"status":True,"file_type":file_type}
-        else:
-            logger.debug(f"Convertion failed - Command: {self.command} \n\n Result: {result.stderr.decode()}")
-            return {"status":False,"error":result.stderr.decode()}
+
+        logger.debug(f"Beginning convert process with command: {' '.join(command)}")
+
+        try:
+            result = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=300  # 5 minute timeout
+            )
+
+            if result.returncode == 0:
+                logger.debug(f"Conversion successful for {file_obj.file_name}")
+                return {"status": True, "file_type": file_type}
+            else:
+                logger.error(f"Conversion failed - Command: {' '.join(command)}\n\nError: {result.stderr}")
+                return {"status": False, "error": result.stderr}
+
+        except subprocess.TimeoutExpired:
+            logger.error(f"Conversion timeout for {file_obj.file_name}")
+            return {"status": False, "error": "Conversion process timed out after 5 minutes"}
+        except Exception as e:
+            logger.error(f"Unexpected error during conversion: {str(e)}")
+            return {"status": False, "error": f"Internal error: {str(e)}"}
     
     @staticmethod
     def _host_to_container_path(host_path: str) -> str:
