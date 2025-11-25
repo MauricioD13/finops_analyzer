@@ -1,0 +1,42 @@
+FROM python:3.12-slim AS builder
+
+# Install build dependencies for pyarrow
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    g++ \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
+
+# Create directory structure to copy to runtime stage
+RUN mkdir -p /app/deploy/dev/input /app/deploy/dev/output /app/logs
+
+
+FROM python:3.12-slim
+WORKDIR /app
+
+# Copy virtual environment from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy application code
+COPY . /app
+
+# Copy pre-created directories from builder
+COPY --from=builder /app/deploy /app/deploy
+COPY --from=builder /app/logs /app/logs
+
+ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONPATH="/app"
+EXPOSE 8000
+
+# Health check to verify the service is running
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD ["python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
+
+ENTRYPOINT []
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--proxy-headers", "--workers", "2"]
