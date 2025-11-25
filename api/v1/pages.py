@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, UploadFile, Form, File
-from finops_analyzer.api.deps import templates
+from api.deps import templates
 
 router = APIRouter(
     prefix="/pages",

@@ -8,19 +8,27 @@ import subprocess
 import shutil
 from pathlib import Path
 # Local imports
-from finops_analyzer.api.v1.pages import router as pages_v1_router
-from finops_analyzer.api.deps import templates
-from finops_analyzer import schemas
-from finops_analyzer.api.deps import get_focus_converter_service, get_file_deleter_service
-from finops_analyzer.focus_converter.service import FocusConverterService, FileDeleterService
-from finops_analyzer.logger import get_logger
+from api.v1.pages import router as pages_v1_router
+from api.deps import templates
+import schemas
+from api.deps import get_focus_converter_service, get_file_deleter_service
+from converter_services.service import FocusConverterService, FileDeleterService
+from logger import get_logger
+import sentry_sdk
 
+sentry_sdk.init(
+    dsn=os.getenv("SENTRY_URL"),
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
 logger = get_logger()
-
 app = FastAPI()
-# Create upload directory
 
-UPLOAD_DIR = Path("deploy/dev/input/")
+# Create upload directory
+UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "./upload"))
+DOWNLOAD_DIR = Path(os.getenv("OUTPUT_DIR", "./download"))
+    
 BASE_OUTPUT_NAME="focus-converted-output"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
@@ -135,11 +143,11 @@ async def converter_post(
         
 @app.get("/download/{file_name}")
 def download_file(file_name: str, background_tasks: BackgroundTasks, file_deleter_service: Annotated[FileDeleterService, Depends(get_file_deleter_service)]):
-    file_path = f"./deploy/dev/output/{file_name}"
+    file_path = f"{DOWNLOAD_DIR}/{file_name}"
     if os.path.exists(file_path):
         background_tasks.add_task(
             file_deleter_service.delete_file,
-            directory_path="./deploy/dev/output/",
+            directory_path=str(DOWNLOAD_DIR),
             file_name=file_name
         )
         return FileResponse(
@@ -149,3 +157,7 @@ def download_file(file_name: str, background_tasks: BackgroundTasks, file_delete
         )
     else:
         raise HTTPException(status_code=404, detail="File not found")
+
+@app.get("/health")
+def health_check():
+    return JSONResponse(content={"status": "ok"}, status_code=200)

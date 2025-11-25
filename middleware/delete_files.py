@@ -1,6 +1,6 @@
 from fastapi import Request
-from finops_analyzer.api.deps import get_file_deleter_service
-from finops_analyzer.logger import logger
+from api.deps import get_file_deleter_service
+from logger import logger
 
 async def file_deletion_middleware(request: Request, call_next):
     """
