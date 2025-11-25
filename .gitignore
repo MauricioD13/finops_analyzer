@@ -2,3 +2,10 @@
 *.csv
 __pycache__/
 *.gz
+.env_vars
+.vscode/
+.idea/
+logs/
+*.log
+deploy/dev/input/
+deploy/dev/output/

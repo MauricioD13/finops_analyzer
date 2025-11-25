@@ -1,0 +1,45 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Git
+.git/
+.gitignore
+
+# Logs
+logs/
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Temporary files
+*.tmp
+.DS_Store
+
+# Lock files (we copy them explicitly in Dockerfile)
+# poetry.lock (deleted from repo)
+
+# Development
+deploy/dev/input/
+deploy/dev/output/
