@@ -1,7 +1,7 @@
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from converter_services.service import FocusConverterService, FileDeleterService
-from main import UPLOAD_DIR, DOWNLOAD_DIR
+from config import UPLOAD_DIR, DOWNLOAD_DIR
 
 templates = Jinja2Templates(directory="templates")
 

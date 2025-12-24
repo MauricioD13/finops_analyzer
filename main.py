@@ -13,6 +13,7 @@ from api.deps import templates
 import schemas
 from api.deps import get_focus_converter_service, get_file_deleter_service
 from converter_services.service import FocusConverterService, FileDeleterService
+from config import UPLOAD_DIR, DOWNLOAD_DIR, BASE_OUTPUT_NAME, MAX_FILE_SIZE
 from logger import get_logger
 import sentry_sdk
 
@@ -25,18 +26,8 @@ sentry_sdk.init(
 logger = get_logger()
 app = FastAPI()
 
-# Create upload directory
-UPLOAD_DIR = Path(os.getenv("UPLOAD_DIR", "./upload"))
-DOWNLOAD_DIR = Path(os.getenv("OUTPUT_DIR", "./download"))
-    
-BASE_OUTPUT_NAME="focus-converted-output"
-UPLOAD_DIR.mkdir(exist_ok=True)
-
 app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(pages_v1_router, tags=["pages"])
-
-MAX_FILE_SIZE = 100 * 1024 * 1024  # 50 MB
-
 
 @app.get("/")
 def read_root():
@@ -101,7 +92,8 @@ async def converter_post(
                 result = focus_converter_service.convert_file(file_obj)
                 logger.debug("Finish convertion")
             except Exception as e:
-                print(f"Error: {e}, File att: {file_obj.dump_model()}")
+                if file_obj:   
+                    print(f"Error: {e}, File att: {file_obj.model_dump()}")
                 exit(1)
             
     else:
