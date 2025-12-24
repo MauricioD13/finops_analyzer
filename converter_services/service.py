@@ -131,7 +131,8 @@ class FocusConverterService:
 
         # Build input and output paths
         input_path = os.path.join(self.input_dir, file_obj.file_name)
-        output_path = self.output_dir + "/"  # focus-converter expects trailing slash
+        print(f"Output dir: {self.output_dir}")
+        output_path = str(self.output_dir) + "/"  # focus-converter expects trailing slash
 
         # Build the command
         command = ["focus-converter"]
