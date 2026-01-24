@@ -1,8 +1,6 @@
 ---
 services:
   finops-analyzer:
-    env_file:
-      - ../../.env
     build:
       context: ../..
       dockerfile: deploy/prod/dockerfile.finops_analyzer.yaml
@@ -16,7 +14,11 @@ services:
       - finops-logs:/app/logs
     environment:
       - PYTHONUNBUFFERED=1
-      - LOG_LEVEL=INFO
+      - LOG_LEVEL=${LOG_LEVEL}
+      - OUTPUT_DIR=${OUTPUT_DIR}
+      - INPUT_DIR=${INPUT_DIR}
+      - LOGS_DIR=${LOGS_DIR}
+      - SENTRY_URL=${SENTRY_URL}
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
